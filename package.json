@@ -1,7 +1,11 @@
 {
   "name": "photo-renamer",
   "version": "0.0.1",
-  "description": "",
+  "description": "Adds creation date to photos filenames.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zhukov-maxim/photo-renamer.git"
+  },
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
