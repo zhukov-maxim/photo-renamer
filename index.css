@@ -2,6 +2,7 @@
   box-sizing: border-box;
   -webkit-user-select: none;
   cursor: default;
+  font-family: inherit;
 }
 
 *:focus {
@@ -25,28 +26,37 @@ body,
 #root {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 15px;
 }
 
 input {
   font-size: 12px;
 }
-.button {
-  background-color: #fafafa;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  height: 24px;
-}
 
-.button:hover {
-  background-color: #f5f5f5;
+.button {
+  height: 19px;
+  border: none;
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 0.5px 1px 0 rgba(0, 0, 0, 0.27), 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+  color: #262626;
+  font-size: 12px;
+  line-height: 19px;
+  font-weight: 500;
+  padding: 0 15px;
 }
 
 .button:active {
   color: #fff;
-  background-color: #1589FF;
-  box-shadow: none;
+  background-image: linear-gradient(to bottom, #6ab3fa, #087fff);
+  box-shadow: 0 0.5px 1px 0 rgba(0, 0, 0, 0.27);
+  border-style: solid;
+  border-width: 1px;
+  border-image-source: linear-gradient(to bottom, #4da3f8, #045cfe);
+  border-image-slice: 1;
+  padding-left: 14px;
+  padding-right: 14px;
+  line-height: 16px;
 }
 
 .button:disabled {
@@ -64,15 +74,18 @@ input {
   display: block;
   width: 100%;
   margin-bottom: 4px;
+  font-size: 12px;
 }
 
 .folder__path {
   flex: 1;
   background-color: #fff;
-  border: 1px solid #ccc;
-  padding: 2px 6px;
-  min-height: 24px;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  border: solid 0.5px rgba(0, 0, 0, 0.25);
+  padding: 2px 3px;
+  height: 19px;
   margin-right: 4px;
+  vertical-align: top;
 }
 
 .folder__input {
@@ -89,13 +102,14 @@ input {
 .controls {
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 10px;
 }
 
 .log {
   flex: 1;
-  margin-top: 30px;
   background-color: #fff;
-  padding: 10px;
+  border: solid 0.5px rgba(0, 0, 0, 0.25);
+  padding: 5px 8px;
   font-size: 11px;
   overflow: auto;
   -webkit-user-select: auto;

@@ -26,7 +26,10 @@
       <div class="controls">
         <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>
       </div>
-      <div class="log">
+      <label class="folder__label" for="log">
+        Result:
+      </label>
+      <div class="log" id="log">
         <div class="log__item" v-for="item in log" :key="123">
           {{ item }}
         </div>
