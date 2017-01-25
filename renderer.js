@@ -58,7 +58,7 @@ const app = new Vue({
     log: []
   },
   computed: {
-    foldersSelected: function() {
+    foldersSelected() {
       return !(this.inputFolder);
     }
   },
@@ -85,7 +85,7 @@ const app = new Vue({
 
       const currentTime = new Date();
       const outputFolderCreationDateAndTime =
-        currentTime.toISOString().slice(0,10) +
+        currentTime.toISOString().slice(0, 10) +
         FILENAME_DELIMITER +
         currentTime.getHours() +
         DATE_DELIMITER +
@@ -93,7 +93,7 @@ const app = new Vue({
         DATE_DELIMITER +
         currentTime.getSeconds();
 
-      const outputFolder = (this.outputFolder && this.outputFolder != this.inputFolder) ?
+      const outputFolder = (this.outputFolder && this.outputFolder !== this.inputFolder) ?
         `${this.outputFolder}/` :
         `${this.inputFolder}/Sorted Photos${FILENAME_DELIMITER}${outputFolderCreationDateAndTime}/`;
 
