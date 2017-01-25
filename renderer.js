@@ -33,7 +33,9 @@ const renameAndCopyFile = (fileName, inputFolder, outputFolder) => {
   const dateSubfolder = `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/`;
   makeDir(dateSubfolder);
 
-  const formattedFileName = formattedDate + FILENAME_DELIMITER + fileName;
+  const formattedFileName = formattedDate ?
+    formattedDate + FILENAME_DELIMITER + fileName :
+    fileName;
   const outputFilePath = dateSubfolder + formattedFileName;
 
   fs.writeFileSync(outputFilePath, buffer);
