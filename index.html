@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Photo Renamer</title>
+    <link href="index.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root">
+      <div class="folder">
+        <label class="folder__label" for="inputFolder">
+          Input folder:
+        </label>
+        <input class="folder__path" type="text" v-model="inputFolder" placeholder="Choose input folder...">
+        <input class="folder__input" type="file" id="inputFolder" ref="inputFolder" webkitdirectory v-on:change="getInputFolder">
+        <button class="button folder__button" v-on:click="chooseInputFolder">Choose...</button>
+      </div>
+      <div class="folder">
+        <label class="folder__label" for="outputFolder">
+          Output folder:
+        </label>
+        <input class="folder__path" type="text" v-model="outputFolder" placeholder="Choose output folder...">
+        <input class="folder__input" type="file" id="outputFolder" ref="outputFolder" webkitdirectory v-on:change="getOutputFolder">
+        <button class="button folder__button" v-on:click="chooseOutputFolder">Choose...</button>
+      </div>
+      <div class="controls">
+        <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>
+      </div>
+      <div class="log">
+        <div class="log__item" v-for="item in log" :key="123">
+          {{ item }}
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer.js');
+  </script>
+</html>
