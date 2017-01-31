@@ -79,6 +79,21 @@ const app = new Vue({
       const outputFolder = document.getElementById('outputFolder').files[0].path;
       this.outputFolder = outputFolder;
     },
+    renameAndCopyFilesList(list, inputFolder, outputFolder) {
+      if (list.length <= 0) {
+        this.log.push('Done.');
+        return;
+      }
+
+      const fileName = list.shift();
+
+      const result = renameAndCopyFile(fileName, inputFolder, outputFolder);
+      this.log.push(result);
+
+      setTimeout(() => {
+        this.renameAndCopyFilesList(list, inputFolder, outputFolder);
+      }, 0);
+    },
     renamePhotos() {
       console.log('rename start');
 
@@ -107,14 +122,8 @@ const app = new Vue({
 
       console.log(inputFolder);
       console.log(outputFolder);
-      console.log(jpegOnlyFilesList);
 
-      jpegOnlyFilesList.forEach((fileName) => {
-        const result = renameAndCopyFile(fileName, inputFolder, outputFolder);
-        this.log.push(result);
-
-        // TODO: List should rerender after each pushed item.
-      });
+      this.renameAndCopyFilesList(jpegOnlyFilesList, inputFolder, outputFolder);
 
       console.log('rename end');
     }
