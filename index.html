@@ -23,6 +23,12 @@
         <input class="folder__input" type="file" id="outputFolder" ref="outputFolder" webkitdirectory v-on:change="getOutputFolder">
         <button class="button folder__button" v-on:click="chooseOutputFolder">Choose...</button>
       </div>
+      <div class="options">
+        <label class="options__label" for="createDateSubfolders">
+          Create date subfolders:
+        </label>
+        <input type="checkbox" id="createDateSubfolders" v-model="createDateSubfolders">
+      </div>
       <div class="controls">
         <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>
       </div>

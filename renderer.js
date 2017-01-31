@@ -22,7 +22,7 @@ const getCreationDateFromBuffer = (buffer) => {
   return exifData.tags.GPSDateStamp;
 };
 
-const renameAndCopyFile = (fileName, inputFolder, outputFolder) => {
+const renameAndCopyFile = (fileName, inputFolder, outputFolder, createDateSubfolders) => {
   const filePath = inputFolder + fileName;
 
   const buffer = fs.readFileSync(filePath);
@@ -30,13 +30,19 @@ const renameAndCopyFile = (fileName, inputFolder, outputFolder) => {
   const rawGPSDateStamp = getCreationDateFromBuffer(buffer) || '';
   const formattedDate = rawGPSDateStamp.replace(/:/g, DATE_DELIMITER);
 
-  const dateSubfolder = `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/`;
-  makeDir(dateSubfolder);
-
   const formattedFileName = formattedDate ?
     formattedDate + FILENAME_DELIMITER + fileName :
     fileName;
-  const outputFilePath = dateSubfolder + formattedFileName;
+
+  let outputFilePath;
+
+  if (createDateSubfolders) {
+    const dateSubfolder = `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/`;
+    makeDir(dateSubfolder);
+    outputFilePath = dateSubfolder + formattedFileName;
+  } else {
+    outputFilePath = outputFolder + formattedFileName;
+  }
 
   fs.writeFileSync(outputFilePath, buffer);
 
@@ -57,6 +63,7 @@ const app = new Vue({
   data: {
     inputFolder: '',
     outputFolder: '',
+    createDateSubfolders: true,
     log: []
   },
   computed: {
@@ -87,7 +94,13 @@ const app = new Vue({
 
       const fileName = list.shift();
 
-      const result = renameAndCopyFile(fileName, inputFolder, outputFolder);
+      const result = renameAndCopyFile(
+        fileName,
+        inputFolder,
+        outputFolder,
+        this.createDateSubfolders
+      );
+
       this.log.push(result);
 
       setTimeout(() => {

@@ -29,6 +29,10 @@ body,
   padding: 15px;
 }
 
+label {
+  font-size: 12px;
+}
+
 input {
   font-size: 12px;
 }
@@ -74,7 +78,6 @@ input {
   display: block;
   width: 100%;
   margin-bottom: 4px;
-  font-size: 12px;
 }
 
 .folder__path {
@@ -97,6 +100,10 @@ input {
 
 .folder__button {
   flex: 0 0 auto;
+}
+
+.options {
+  margin-bottom: 20px;
 }
 
 .controls {
