@@ -37,7 +37,10 @@ const renameAndCopyFile = (fileName, inputFolder, outputFolder, createDateSubfol
   let outputFilePath;
 
   if (createDateSubfolders) {
-    const dateSubfolder = `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/`;
+    const dateSubfolder = formattedDate ?
+      `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/` :
+      `${outputFolder}Photos without dates/`;
+
     makeDir(dateSubfolder);
     outputFilePath = dateSubfolder + formattedFileName;
   } else {
