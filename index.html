@@ -27,7 +27,7 @@
         <label class="options__label" for="createDateSubfolders">
           Create date subfolders:
         </label>
-        <input type="checkbox" id="createDateSubfolders" v-model="createDateSubfolders">
+        <input type="checkbox" id="createDateSubfolders" v-model="preferences.createDateSubfolders" v-on:click="handleCreateDateSubfolders">
       </div>
       <div class="controls">
         <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>

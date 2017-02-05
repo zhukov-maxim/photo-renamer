@@ -5,6 +5,9 @@
 const fs = require('fs');
 const exifParser = require('exif-parser');
 const Vue = require('./node_modules/vue/dist/vue.js');
+const ElectronConfig = require('electron-config');
+
+const electronConfig = new ElectronConfig();
 
 const DATE_DELIMITER = '-';
 const FILENAME_DELIMITER = ' - ';
@@ -60,15 +63,46 @@ const isJpeg = (fileName) => {
   return hasJpegExtension;
 };
 
+const defaultAppState = {
+  inputFolder: '',
+  outputFolder: '',
+  log: []
+};
+
+const defaultPreferences = {
+  createDateSubfolders: true
+};
+
+const loadPreferences = () => electronConfig.get();
+
+const savePreferences = (changedPreferences) => {
+  const newPreferences = Object.assign(
+    {},
+    loadPreferences(),
+    changedPreferences
+  );
+
+  electronConfig.set(newPreferences);
+};
+
+const currentPreferences = Object.assign(
+  {},
+  defaultPreferences,
+  loadPreferences()
+);
+
+const currentAppState = Object.assign(
+  {},
+  defaultAppState,
+  {
+    preferences: currentPreferences
+  }
+);
+
 /* eslint-disable no-unused-vars */
 const app = new Vue({
   el: '#root',
-  data: {
-    inputFolder: '',
-    outputFolder: '',
-    createDateSubfolders: true,
-    log: []
-  },
+  data: currentAppState,
   computed: {
     foldersSelected() {
       return !(this.inputFolder);
@@ -89,6 +123,11 @@ const app = new Vue({
       const outputFolder = document.getElementById('outputFolder').files[0].path;
       this.outputFolder = outputFolder;
     },
+    handleCreateDateSubfolders() {
+      savePreferences({
+        createDateSubfolders: this.preferences.createDateSubfolders
+      });
+    },
     renameAndCopyFilesList(list, inputFolder, outputFolder) {
       if (list.length <= 0) {
         this.log.push('Done.');
@@ -101,7 +140,7 @@ const app = new Vue({
         fileName,
         inputFolder,
         outputFolder,
-        this.createDateSubfolders
+        this.preferences.createDateSubfolders
       );
 
       this.log.push(result);
