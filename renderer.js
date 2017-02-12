@@ -71,7 +71,8 @@ const isJpeg = (fileName) => {
 const defaultAppState = {
   inputFolder: '',
   outputFolder: '',
-  log: []
+  log: [],
+  isProcessing: false
 };
 
 const defaultPreferences = {
@@ -140,8 +141,11 @@ const app = new Vue({
       });
     },
     renameAndCopyFilesList(list, inputFolder, outputFolder) {
+      this.isProcessing = true;
+
       if (list.length <= 0) {
         this.log.push('Done.');
+        this.isProcessing = false;
         return;
       }
 

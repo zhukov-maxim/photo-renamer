@@ -37,6 +37,14 @@ input {
   font-size: 12px;
 }
 
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  background: url('img/spinner.svg') 0 0 no-repeat;
+}
+
 .button {
   height: 19px;
   border: none;
@@ -117,6 +125,7 @@ input {
 .controls {
   display: flex;
   justify-content: flex-end;
+  min-height: 20px;
   margin-bottom: 10px;
 }
 

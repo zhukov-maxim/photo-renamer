@@ -34,6 +34,7 @@
         </label>
       </div>
       <div class="controls">
+        <span class="spinner" v-show="isProcessing"></span>
         <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>
       </div>
       <label class="folder__label" for="log">
