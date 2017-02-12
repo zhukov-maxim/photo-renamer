@@ -24,10 +24,14 @@
         <button class="button folder__button" v-on:click="chooseOutputFolder">Choose...</button>
       </div>
       <div class="options">
-        <label class="options__label" for="createDateSubfolders">
-          Create date subfolders:
+        <label class="options__label">
+          <input type="checkbox" id="createDateSubfolders" v-model="preferences.createDateSubfolders" v-on:click="handleCreateDateSubfolders">
+          Create date subfolders
         </label>
-        <input type="checkbox" id="createDateSubfolders" v-model="preferences.createDateSubfolders" v-on:click="handleCreateDateSubfolders">
+        <label class="options__label">
+          <input type="checkbox" id="renameFiles" v-model="preferences.renameFiles" v-on:click="handleRenameFiles">
+          Rename files
+        </label>
       </div>
       <div class="controls">
         <button class="button" v-on:click="renamePhotos" v-bind:disabled="foldersSelected">Copy and Rename</button>

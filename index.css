@@ -106,6 +106,14 @@ input {
   margin-bottom: 20px;
 }
 
+.options__label {
+  display: block;
+}
+
+.options__label + .options__label {
+  margin-top: 10px;
+}
+
 .controls {
   display: flex;
   justify-content: flex-end;

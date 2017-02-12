@@ -25,7 +25,12 @@ const getCreationDateFromBuffer = (buffer) => {
   return exifData.tags.GPSDateStamp;
 };
 
-const renameAndCopyFile = (fileName, inputFolder, outputFolder, createDateSubfolders) => {
+const renameAndCopyFile = (
+    fileName,
+    inputFolder,
+    outputFolder,
+    createDateSubfolders,
+    renameFiles) => {
   const filePath = inputFolder + fileName;
 
   const buffer = fs.readFileSync(filePath);
@@ -33,7 +38,7 @@ const renameAndCopyFile = (fileName, inputFolder, outputFolder, createDateSubfol
   const rawGPSDateStamp = getCreationDateFromBuffer(buffer) || '';
   const formattedDate = rawGPSDateStamp.replace(/:/g, DATE_DELIMITER);
 
-  const formattedFileName = formattedDate ?
+  const formattedFileName = (renameFiles && formattedDate) ?
     formattedDate + FILENAME_DELIMITER + fileName :
     fileName;
 
@@ -70,7 +75,8 @@ const defaultAppState = {
 };
 
 const defaultPreferences = {
-  createDateSubfolders: true
+  createDateSubfolders: true,
+  renameFiles: true
 };
 
 const loadPreferences = () => electronConfig.get();
@@ -128,6 +134,11 @@ const app = new Vue({
         createDateSubfolders: this.preferences.createDateSubfolders
       });
     },
+    handleRenameFiles() {
+      savePreferences({
+        renameFiles: this.preferences.renameFiles
+      });
+    },
     renameAndCopyFilesList(list, inputFolder, outputFolder) {
       if (list.length <= 0) {
         this.log.push('Done.');
@@ -140,7 +151,8 @@ const app = new Vue({
         fileName,
         inputFolder,
         outputFolder,
-        this.preferences.createDateSubfolders
+        this.preferences.createDateSubfolders,
+        this.preferences.renameFiles
       );
 
       this.log.push(result);
