@@ -4,7 +4,7 @@
   "description": "Adds creation date to photos filenames.",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "NODE_ENV=development electron .",
     "clean": "rm -rf build",
     "package": "electron-packager . --platform=win32,darwin --arch=x64 --asar --out='./build'",
     "build": "npm run clean && npm run package"
