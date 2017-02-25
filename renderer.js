@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const exifParser = require('exif-parser');
+const junk = require('junk');
 const Vue = require('./node_modules/vue/dist/vue.js');
 const ElectronConfig = require('electron-config');
 
@@ -20,18 +21,21 @@ const makeDir = (name) => {
 };
 
 const getCreationDateFromBuffer = (buffer) => {
-  const exifParserBuffer = exifParser.create(buffer);
-  const exifData = exifParserBuffer.parse();
+  try {
+    const exifParserBuffer = exifParser.create(buffer);
 
-  const modifyDateAndTime = exifData.tags.ModifyDate;
+    const exifData = exifParserBuffer.parse();
+    const modifyDateAndTime = exifData.tags.ModifyDate;
 
-  if (!modifyDateAndTime) {
+    if (!modifyDateAndTime) {
+      return undefined;
+    }
+    const modifyDate = modifyDateAndTime.slice(0, modifyDateAndTime.indexOf(' '));
+
+    return modifyDate;
+  } catch (e) {
     return undefined;
   }
-
-  const modifyDate = modifyDateAndTime.slice(0, modifyDateAndTime.indexOf(' '));
-
-  return modifyDate;
 };
 
 const renameAndCopyFile = (
@@ -56,7 +60,7 @@ const renameAndCopyFile = (
   if (createDateSubfolders) {
     const dateSubfolder = formattedDate ?
       `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/` :
-      `${outputFolder}Photos without dates/`;
+      `${outputFolder}Files without dates/`;
 
     makeDir(dateSubfolder);
     outputFilePath = dateSubfolder + formattedFileName;
@@ -68,13 +72,6 @@ const renameAndCopyFile = (
 
   // TODO: Return error message if something went wrong:
   return `${fileName} → ${formattedFileName}`;
-};
-
-const isJpeg = (fileName) => {
-  const lowerCaseName = fileName.toLowerCase();
-  const hasJpegExtension = lowerCaseName.endsWith('.jpg') || lowerCaseName.endsWith('.jpeg');
-
-  return hasJpegExtension;
 };
 
 const defaultAppState = {
@@ -175,8 +172,6 @@ const app = new Vue({
       }, 0);
     },
     renamePhotos() {
-      console.log('rename start');
-
       // TODO: Find cross-platform solution:
       const inputFolder = `${this.inputFolder}/`;
 
@@ -194,18 +189,23 @@ const app = new Vue({
         `${this.outputFolder}/` :
         `${this.inputFolder}/Sorted Photos${FILENAME_DELIMITER}${outputFolderCreationDateAndTime}/`;
 
-      const filesList = fs.readdirSync(inputFolder);
-      const jpegOnlyFilesList = filesList.filter(isJpeg);
+      const dirList = fs.readdirSync(inputFolder);
 
-      // TODO: Create an output folder with unique name.
+      const filesList = dirList.filter((name) => {
+        // Filter out system junk files like .DS_Store and Thumbs.db.
+        if (junk.is(name)) {
+          return false;
+        }
+
+        const path = inputFolder + name;
+        const stat = fs.statSync(path);
+
+        return stat.isFile();
+      });
+
       makeDir(outputFolder);
 
-      console.log(inputFolder);
-      console.log(outputFolder);
-
-      this.renameAndCopyFilesList(jpegOnlyFilesList, inputFolder, outputFolder);
-
-      console.log('rename end');
+      this.renameAndCopyFilesList(filesList, inputFolder, outputFolder);
     }
   }
 });
