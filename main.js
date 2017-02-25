@@ -26,7 +26,8 @@ function createWindow() {
     height: 600,
     minHeight: 300,
     backgroundColor: '#f2f2f2',
-    title: 'Photo Renamer'
+    title: 'Photo Renamer',
+    acceptFirstMouse: true
   });
 
   // and load the index.html of the app.
