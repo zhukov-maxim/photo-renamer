@@ -22,7 +22,16 @@ const makeDir = (name) => {
 const getCreationDateFromBuffer = (buffer) => {
   const exifParserBuffer = exifParser.create(buffer);
   const exifData = exifParserBuffer.parse();
-  return exifData.tags.GPSDateStamp;
+
+  const modifyDateAndTime = exifData.tags.ModifyDate;
+
+  if (!modifyDateAndTime) {
+    return undefined;
+  }
+
+  const modifyDate = modifyDateAndTime.slice(0, modifyDateAndTime.indexOf(' '));
+
+  return modifyDate;
 };
 
 const renameAndCopyFile = (
