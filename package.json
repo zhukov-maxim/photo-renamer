@@ -16,6 +16,7 @@
   "author": "Maxim Zhukov",
   "license": "ISC",
   "devDependencies": {
+    "electron-packager": "^8.5.2",
     "eslint": "^3.15.0",
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0"
