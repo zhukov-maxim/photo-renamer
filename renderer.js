@@ -1,78 +1,11 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
-
 const fs = require('fs');
-const exifParser = require('exif-parser');
 const junk = require('junk');
+const constants = require('./constants');
+const io = require('./io');
 const Vue = require('./node_modules/vue/dist/vue.js');
 const ElectronConfig = require('electron-config');
 
 const electronConfig = new ElectronConfig();
-
-const DATE_DELIMITER = '-';
-const FILENAME_DELIMITER = ' - ';
-const NEW_FOLDER_NAME = 'Untitled';
-
-const makeDir = (name) => {
-  if (!fs.existsSync(name)) {
-    fs.mkdirSync(name);
-  }
-};
-
-const getCreationDateFromBuffer = (buffer) => {
-  try {
-    const exifParserBuffer = exifParser.create(buffer);
-
-    const exifData = exifParserBuffer.parse();
-    const modifyDateAndTime = exifData.tags.ModifyDate;
-
-    if (!modifyDateAndTime) {
-      return undefined;
-    }
-    const modifyDate = modifyDateAndTime.slice(0, modifyDateAndTime.indexOf(' '));
-
-    return modifyDate;
-  } catch (e) {
-    return undefined;
-  }
-};
-
-const renameAndCopyFile = (
-    fileName,
-    inputFolder,
-    outputFolder,
-    createDateSubfolders,
-    renameFiles) => {
-  const filePath = inputFolder + fileName;
-
-  const buffer = fs.readFileSync(filePath);
-
-  const rawGPSDateStamp = getCreationDateFromBuffer(buffer) || '';
-  const formattedDate = rawGPSDateStamp.replace(/:/g, DATE_DELIMITER);
-
-  const formattedFileName = (renameFiles && formattedDate) ?
-    formattedDate + FILENAME_DELIMITER + fileName :
-    fileName;
-
-  let outputFilePath;
-
-  if (createDateSubfolders) {
-    const dateSubfolder = formattedDate ?
-      `${outputFolder}${formattedDate}${FILENAME_DELIMITER}${NEW_FOLDER_NAME}/` :
-      `${outputFolder}Files without dates/`;
-
-    makeDir(dateSubfolder);
-    outputFilePath = dateSubfolder + formattedFileName;
-  } else {
-    outputFilePath = outputFolder + formattedFileName;
-  }
-
-  fs.writeFileSync(outputFilePath, buffer);
-
-  // TODO: Return error message if something went wrong:
-  return `${fileName} → ${formattedFileName}`;
-};
 
 const defaultAppState = {
   inputFolder: '',
@@ -125,27 +58,33 @@ const app = new Vue({
     chooseInputFolder() {
       this.$refs.inputFolder.click();
     },
+
     chooseOutputFolder() {
       this.$refs.outputFolder.click();
     },
+
     getInputFolder() {
       const inputFolder = document.getElementById('inputFolder').files[0].path;
       this.inputFolder = inputFolder;
     },
+
     getOutputFolder() {
       const outputFolder = document.getElementById('outputFolder').files[0].path;
       this.outputFolder = outputFolder;
     },
+
     handleCreateDateSubfolders() {
       savePreferences({
         createDateSubfolders: this.preferences.createDateSubfolders
       });
     },
+
     handleRenameFiles() {
       savePreferences({
         renameFiles: this.preferences.renameFiles
       });
     },
+
     renameAndCopyFilesList(list, inputFolder, outputFolder) {
       this.isProcessing = true;
 
@@ -157,7 +96,7 @@ const app = new Vue({
 
       const fileName = list.shift();
 
-      const result = renameAndCopyFile(
+      const result = io.renameAndCopyFile(
         fileName,
         inputFolder,
         outputFolder,
@@ -171,6 +110,7 @@ const app = new Vue({
         this.renameAndCopyFilesList(list, inputFolder, outputFolder);
       }, 0);
     },
+
     renamePhotos() {
       // TODO: Find cross-platform solution:
       const inputFolder = `${this.inputFolder}/`;
@@ -178,16 +118,16 @@ const app = new Vue({
       const currentTime = new Date();
       const outputFolderCreationDateAndTime =
         currentTime.toISOString().slice(0, 10) +
-        FILENAME_DELIMITER +
+        constants.FILENAME_DELIMITER +
         currentTime.getHours() +
-        DATE_DELIMITER +
+        constants.DATE_DELIMITER +
         currentTime.getMinutes() +
-        DATE_DELIMITER +
+        constants.DATE_DELIMITER +
         currentTime.getSeconds();
 
       const outputFolder = (this.outputFolder && this.outputFolder !== this.inputFolder) ?
         `${this.outputFolder}/` :
-        `${this.inputFolder}/Sorted Photos${FILENAME_DELIMITER}${outputFolderCreationDateAndTime}/`;
+        `${this.inputFolder}/Sorted Photos${constants.FILENAME_DELIMITER}${outputFolderCreationDateAndTime}/`;
 
       const dirList = fs.readdirSync(inputFolder);
 
@@ -203,7 +143,7 @@ const app = new Vue({
         return stat.isFile();
       });
 
-      makeDir(outputFolder);
+      io.makeDir(outputFolder);
 
       this.renameAndCopyFilesList(filesList, inputFolder, outputFolder);
     }
