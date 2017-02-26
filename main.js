@@ -39,7 +39,14 @@ function createWindow() {
 
   // Open the DevTools in development mode.
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools();
+    const electronDevtoolsInstaller = require('electron-devtools-installer');
+
+    electronDevtoolsInstaller.default(electronDevtoolsInstaller.VUEJS_DEVTOOLS)
+      .then((name) => {
+        console.log(`Added Extension:  ${name}`)
+        mainWindow.webContents.openDevTools();
+      })
+      .catch(err => console.log('An error occurred: ', err));
   }
 
   // Emitted when the window is closed.
