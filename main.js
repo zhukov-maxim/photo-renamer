@@ -43,7 +43,7 @@ function createWindow() {
 
     electronDevtoolsInstaller.default(electronDevtoolsInstaller.VUEJS_DEVTOOLS)
       .then((name) => {
-        console.log(`Added Extension:  ${name}`)
+        console.log(`Added Extension: ${name}`);
         mainWindow.webContents.openDevTools();
       })
       .catch(err => console.log('An error occurred: ', err));
