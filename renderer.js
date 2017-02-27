@@ -54,6 +54,12 @@ const app = new Vue({
       return !(this.inputFolder);
     }
   },
+  watch: {
+    log() {
+      const lg = document.getElementById('log');
+      lg.scrollTop = lg.scrollHeight;
+    }
+  },
   methods: {
     chooseInputFolder() {
       this.$refs.inputFolder.click();
