@@ -26,7 +26,7 @@
     "electron-config": "^0.2.1",
     "electron-devtools-installer": "^2.1.0",
     "electron-reload": "^1.1.0",
-    "exif-parser": "^0.1.9",
+    "exif-parser": "0.1.9",
     "junk": "^2.0.0",
     "vue": "^2.1.10"
   }
