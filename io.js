@@ -1,5 +1,8 @@
-const fs = require('fs');
 const exifParser = require('exif-parser');
+const exiftool = require('exiftool-vendored').exiftool;
+const fs = require('fs');
+const path = require('path');
+
 const constants = require('./constants');
 
 module.exports = {
@@ -9,22 +12,59 @@ module.exports = {
     }
   },
 
-  getCreationDateFromBuffer(buffer) {
+  getFileDateGeneric(filePath, callback) {
     try {
+      const buffer = fs.readFileSync(filePath);
       const exifParserBuffer = exifParser.create(buffer);
-
       const exifData = exifParserBuffer.parse();
-      const modifyDateAndTime = exifData.tags.ModifyDate;
 
-      if (!modifyDateAndTime) {
-        return undefined;
-      }
-      const modifyDate = modifyDateAndTime.slice(0, modifyDateAndTime.indexOf(' '));
+      const modifyDateAndTime = this.getRawModifyDateAndTimeGeneric(exifData);
+      const modifyDate = this.getDateFromDateAndTime(modifyDateAndTime);
+      const formattedDate = this.formatDate(modifyDate);
 
-      return modifyDate;
-    } catch (e) {
-      return undefined;
+      callback(formattedDate);
+    } catch (err) {
+      callback(undefined);
     }
+
+    return undefined;
+  },
+
+  getFileDateHeic(filePath, callback) {
+    exiftool
+      .read(filePath)
+      .then((tags) => {
+        const modifyDateAndTime = this.getRawModifyDateAndTimeHeic(tags);
+        const modifyDate = this.getDateFromDateAndTime(modifyDateAndTime);
+        const formattedDate = this.formatDate(modifyDate);
+
+        callback(formattedDate);
+      })
+      .catch(err => console.error('Something terrible happened: ', err));
+  },
+
+  getRawModifyDateAndTimeGeneric(exifData) {
+    if (exifData && exifData.tags) {
+      return exifData.tags.ModifyDate;
+    }
+
+    return undefined;
+  },
+
+  getRawModifyDateAndTimeHeic(exifTags) {
+    if (exifTags && exifTags.ModifyDate) {
+      return exifTags.ModifyDate.rawValue;
+    }
+
+    return undefined;
+  },
+
+  getDateFromDateAndTime(dateAndTime) {
+    return dateAndTime.slice(0, dateAndTime.indexOf(' '));
+  },
+
+  formatDate(rawDate) {
+    return rawDate.replace(/:/g, constants.DATE_DELIMITER);
   },
 
   renameAndCopyFile(
@@ -32,34 +72,45 @@ module.exports = {
     inputFolder,
     outputFolder,
     createDateSubfolders,
-    renameFiles) {
+    renameFiles
+  ) {
     const filePath = inputFolder + fileName;
+    const fileExtension = path.extname(filePath);
 
-    const buffer = fs.readFileSync(filePath);
+    function copy(formattedDate) {
+      const formattedFileName = (renameFiles && formattedDate) ?
+        formattedDate + constants.FILENAME_DELIMITER + fileName :
+        fileName;
 
-    const rawGPSDateStamp = this.getCreationDateFromBuffer(buffer) || '';
-    const formattedDate = rawGPSDateStamp.replace(/:/g, constants.DATE_DELIMITER);
+      let outputFilePath;
 
-    const formattedFileName = (renameFiles && formattedDate) ?
-      formattedDate + constants.FILENAME_DELIMITER + fileName :
-      fileName;
+      if (createDateSubfolders) {
+        const dateSubfolder = formattedDate ?
+          `${outputFolder}${formattedDate}${constants.FILENAME_DELIMITER}${constants.NEW_FOLDER_NAME}/` :
+          `${outputFolder}Files without dates/`;
 
-    let outputFilePath;
+        if (!fs.existsSync(dateSubfolder)) {
+          fs.mkdirSync(dateSubfolder);
+        }
 
-    if (createDateSubfolders) {
-      const dateSubfolder = formattedDate ?
-        `${outputFolder}${formattedDate}${constants.FILENAME_DELIMITER}${constants.NEW_FOLDER_NAME}/` :
-        `${outputFolder}Files without dates/`;
+        outputFilePath = dateSubfolder + formattedFileName;
+      } else {
+        outputFilePath = outputFolder + formattedFileName;
+      }
 
-      this.makeDir(dateSubfolder);
-      outputFilePath = dateSubfolder + formattedFileName;
-    } else {
-      outputFilePath = outputFolder + formattedFileName;
+      console.log(outputFilePath);
+
+      // Node 7 doesn't support fs.copyFileSync.
+      fs.createReadStream(filePath).pipe(fs.createWriteStream(outputFilePath));
+
+      // TODO: Return error message if something went wrong:
+      return `${fileName} → ${formattedFileName}`;
     }
 
-    fs.writeFileSync(outputFilePath, buffer);
-
-    // TODO: Return error message if something went wrong:
-    return `${fileName} → ${formattedFileName}`;
+    if (fileExtension.toLowerCase() === '.heic') {
+      this.getFileDateHeic(filePath, formattedDate => copy(formattedDate));
+    } else {
+      this.getFileDateGeneric(filePath, formattedDate => copy(formattedDate));
+    }
   }
 };
