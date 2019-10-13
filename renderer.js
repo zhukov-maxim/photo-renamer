@@ -102,15 +102,16 @@ const app = new Vue({
 
       const fileName = list.shift();
 
-      const result = io.renameAndCopyFile(
+      io.renameAndCopyFile(
         fileName,
         inputFolder,
         outputFolder,
         this.preferences.createDateSubfolders,
-        this.preferences.renameFiles
+        this.preferences.renameFiles,
+        (result) => {
+          this.log.push(result);
+        }
       );
-
-      this.log.push(result);
 
       setTimeout(() => {
         this.renameAndCopyFilesList(list, inputFolder, outputFolder);

@@ -72,7 +72,8 @@ module.exports = {
     inputFolder,
     outputFolder,
     createDateSubfolders,
-    renameFiles
+    renameFiles,
+    cb
   ) {
     const filePath = inputFolder + fileName;
     const fileExtension = path.extname(filePath);
@@ -98,13 +99,10 @@ module.exports = {
         outputFilePath = outputFolder + formattedFileName;
       }
 
-      console.log(outputFilePath);
-
       // Node 7 doesn't support fs.copyFileSync.
       fs.createReadStream(filePath).pipe(fs.createWriteStream(outputFilePath));
 
-      // TODO: Return error message if something went wrong:
-      return `${fileName} → ${formattedFileName}`;
+      cb(`${fileName} → ${formattedFileName}`);
     }
 
     if (fileExtension.toLowerCase() === '.heic') {
