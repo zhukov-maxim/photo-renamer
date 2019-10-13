@@ -99,8 +99,13 @@ module.exports = {
         outputFilePath = outputFolder + formattedFileName;
       }
 
-      // Node 7 doesn't support fs.copyFileSync.
-      fs.createReadStream(filePath).pipe(fs.createWriteStream(outputFilePath));
+      // Node 7 doesn't support fs.copyFileSync:
+      const fileContent = fs.readFileSync(filePath);
+      fs.writeFileSync(outputFilePath, fileContent);
+
+      // Preserve "created" and "modified" dates:
+      const stat = fs.statSync(filePath);
+      fs.utimesSync(outputFilePath, stat.atime, stat.mtime);
 
       cb(`${fileName} → ${formattedFileName}`);
     }
