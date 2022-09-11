@@ -6,13 +6,15 @@ const path = require('path');
 const constants = require('./constants');
 
 module.exports = {
-  makeDir(name) {
+  makeDirSync(name) {
     if (!fs.existsSync(name)) {
       fs.mkdirSync(name);
     }
   },
 
   getFileDateGeneric(filePath, callback) {
+    console.log('getFileDateGeneric');
+
     try {
       const buffer = fs.readFileSync(filePath);
       const exifParserBuffer = exifParser.create(buffer);
@@ -20,10 +22,21 @@ module.exports = {
 
       const modifyDateAndTime = this.getRawModifyDateAndTimeGeneric(exifData);
       const modifyDate = this.getDateFromDateAndTime(modifyDateAndTime);
+
       const formattedDate = this.formatDate(modifyDate);
 
       callback(formattedDate);
     } catch (err) {
+      // const birthtime = fs.statSync(filePath).birthtime;
+      // const formattedDate =
+      //   birthtime.getFullYear() +
+      //   constants.DATE_DELIMITER +
+      //   (birthtime.getMonth() + 1).toString().padStart(2, '0') +
+      //   constants.DATE_DELIMITER +
+      //   birthtime.getDate().toString().padStart(2, '0');
+
+      // callback(formattedDate);
+
       callback(undefined);
     }
 
@@ -40,7 +53,7 @@ module.exports = {
 
         callback(formattedDate);
       })
-      .catch(err => console.error('Something terrible happened: ', err));
+      .catch((err) => console.error('Something terrible happened: ', err));
   },
 
   getRawModifyDateAndTimeGeneric(exifData) {
@@ -67,28 +80,22 @@ module.exports = {
     return rawDate.replace(/:/g, constants.DATE_DELIMITER);
   },
 
-  renameAndCopyFile(
-    fileName,
-    inputFolder,
-    outputFolder,
-    createDateSubfolders,
-    renameFiles,
-    cb
-  ) {
+  renameAndCopyFile(fileName, inputFolder, outputFolder, createDateSubfolders, renameFiles, cb) {
     const filePath = inputFolder + fileName;
     const fileExtension = path.extname(filePath);
 
     function copy(formattedDate) {
-      const formattedFileName = (renameFiles && formattedDate) ?
-        formattedDate + constants.FILENAME_DELIMITER + fileName :
-        fileName;
+      const formattedFileName =
+        renameFiles && formattedDate
+          ? formattedDate + constants.FILENAME_DELIMITER + fileName
+          : fileName;
 
       let outputFilePath;
 
       if (createDateSubfolders) {
-        const dateSubfolder = formattedDate ?
-          `${outputFolder}${formattedDate}${constants.FILENAME_DELIMITER}${constants.NEW_FOLDER_NAME}/` :
-          `${outputFolder}Files without dates/`;
+        const dateSubfolder = formattedDate
+          ? `${outputFolder}${formattedDate}${constants.FILENAME_DELIMITER}${constants.NEW_FOLDER_NAME}/`
+          : `${outputFolder}Files without dates/`;
 
         if (!fs.existsSync(dateSubfolder)) {
           fs.mkdirSync(dateSubfolder);
@@ -111,9 +118,9 @@ module.exports = {
     }
 
     if (fileExtension.toLowerCase() === '.heic') {
-      this.getFileDateHeic(filePath, formattedDate => copy(formattedDate));
+      this.getFileDateHeic(filePath, (formattedDate) => copy(formattedDate));
     } else {
-      this.getFileDateGeneric(filePath, formattedDate => copy(formattedDate));
+      this.getFileDateGeneric(filePath, (formattedDate) => copy(formattedDate));
     }
   }
 };
