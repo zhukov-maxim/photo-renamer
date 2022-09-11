@@ -18,7 +18,7 @@
   "dependencies": {
     "commander": "^9.4.0",
     "exif-parser": "0.1.9",
-    "exiftool-vendored": "^8.22.0",
+    "exiftool-vendored": "^14.3.0",
     "junk": "^2.0.0"
   }
 }
