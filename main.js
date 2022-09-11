@@ -1,80 +1,85 @@
-const electron = require('electron');
-// Module to control application life.
-const app = electron.app;
+const fs = require('fs');
+const junk = require('junk');
+const { program } = require('commander');
 
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow;
+const io = require('./src/io');
+const constants = require('./src/constants');
 
-const path = require('path');
-const url = require('url');
+program.option('-i, --inputFolder <path>').option('-o, --outputFolder <path>');
+program.parse();
 
-require('electron-reload')(__dirname, {
-  electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
-});
+const options = program.opts();
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
+function normalizePath(path) {
+  // TODO: Find a cross-platform solution.
+  return path.endsWith('/') ? path : `${path}/`;
+}
 
-function createWindow() {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    fullscreenable: false,
-    maximizable: false,
-    width: 480,
-    minWidth: 320,
-    height: 600,
-    minHeight: 300,
-    backgroundColor: '#f2f2f2',
-    title: 'Photo Renamer',
-    acceptFirstMouse: true
-  });
+const inputFolder = normalizePath(options.inputFolder);
+const outputFolder = options.outputFolder ? normalizePath(options.outputFolder) : inputFolder;
 
-  // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
+const preferences = {
+  createDateSubfolders: true,
+  renameFiles: true
+};
 
-  // Open the DevTools in development mode.
-  if (process.env.NODE_ENV === 'development') {
-    const electronDevtoolsInstaller = require('electron-devtools-installer');
+function renameAndCopyFilesList(list, inputPath, outputPath) {
+  if (list.length <= 0) {
+    console.error('No files found');
 
-    electronDevtoolsInstaller.default(electronDevtoolsInstaller.VUEJS_DEVTOOLS)
-      .then((name) => {
-        console.log(`Added Extension: ${name}`);
-        mainWindow.webContents.openDevTools();
-      })
-      .catch(err => console.log('An error occurred: ', err));
+    return;
   }
 
-  // Emitted when the window is closed.
-  mainWindow.on('closed', () => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null;
+  list.forEach((file) => {
+    io.renameAndCopyFile(
+      file,
+      inputPath,
+      outputPath,
+      preferences.createDateSubfolders,
+      preferences.renameFiles,
+      (result) => {
+        console.log(result);
+      }
+    );
   });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+function renameAndCopyPhotos(inputPath, outputPath) {
+  const currentTime = new Date();
+  const outputFolderCreationDateAndTime =
+    currentTime.toISOString().slice(0, 10) +
+    constants.FILENAME_DELIMITER +
+    currentTime.getHours().toString().padStart(2, '0') +
+    constants.DATE_DELIMITER +
+    currentTime.getMinutes().toString().padStart(2, '0') +
+    constants.DATE_DELIMITER +
+    currentTime.getSeconds().toString().padStart(2, '0');
 
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  app.quit();
-});
+  const outputPathCorrected =
+    outputPath && outputPath !== inputPath
+      ? `${outputPath}`
+      : `${inputPath}Sorted Photos${constants.FILENAME_DELIMITER}${outputFolderCreationDateAndTime}/`;
 
-app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
+  const dirList = fs.readdirSync(inputFolder);
+  const filesList = dirList.filter((name) => {
+    // Filter out system junk files like .DS_Store and Thumbs.db.
+    if (junk.is(name)) {
+      return false;
+    }
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+    const path = inputFolder + name;
+    const stat = fs.statSync(path);
+
+    return stat.isFile();
+  });
+
+  io.makeDirSync(outputPathCorrected);
+
+  console.log({ inputPath });
+  console.log({ outputPathCorrected });
+  console.log('');
+
+  renameAndCopyFilesList(filesList, inputFolder, outputPathCorrected);
+}
+
+renameAndCopyPhotos(inputFolder, outputFolder);

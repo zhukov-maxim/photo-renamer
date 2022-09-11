@@ -1,14 +1,9 @@
 {
   "name": "photo-renamer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Adds creation date to photos filenames.",
   "main": "main.js",
-  "scripts": {
-    "start": "NODE_ENV=development electron .",
-    "clean": "rm -rf build",
-    "package": "electron-packager . --platform=win32,darwin --arch=x64 --asar --out='./build'",
-    "build": "npm run clean && npm run package"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/zhukov-maxim/photo-renamer.git"
@@ -16,19 +11,14 @@
   "author": "Maxim Zhukov",
   "license": "ISC",
   "devDependencies": {
-    "electron-packager": "^8.5.2",
     "eslint": "^3.16.1",
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0"
   },
   "dependencies": {
-    "electron": "^1.6.1",
-    "electron-config": "^0.2.1",
-    "electron-devtools-installer": "^2.1.0",
-    "electron-reload": "^1.1.0",
+    "commander": "^9.4.0",
     "exif-parser": "0.1.9",
     "exiftool-vendored": "^8.22.0",
-    "junk": "^2.0.0",
-    "vue": "^2.1.10"
+    "junk": "^2.0.0"
   }
 }
